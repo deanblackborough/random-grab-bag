@@ -1,0 +1,30 @@
+{
+    "name": "deanblackborough/random-grab-bag",
+    "description": "A random grab bag of classes",
+    "autoload": {
+        "psr-4" : {
+            "DBlackborough\\GrabBag\\" : "src/"
+        }
+    },
+    "homepage": "https://github.com/deanblackborough/random-grab-bag",
+    "keywords": [ "image-resize", "image-crop" ],
+    "authors": [
+        {
+            "name": "Dean Blackborough",
+            "email": "dean@g3d-development.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1"
+    },
+    "require-dev": {
+
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/deanblackborough/random-grab-bag"
+        }
+    ],
+    "license": "MIT"
+}
