@@ -15,6 +15,12 @@ use Exception;
  */
 abstract class AbstractResize
 {
+
+    /**
+     * @todo Simplify properties
+     * @todo Split out some of the base logic
+     */
+
     protected $width;
     protected $height;
 
