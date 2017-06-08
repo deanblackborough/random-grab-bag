@@ -15,6 +15,20 @@ use Exception;
  */
 abstract class AbstractResize
 {
+    /**
+     * @var array Source image properties
+     */
+    protected $source = [];
+
+    /**
+     * @var array $destination Destination image properties
+     */
+    protected $destination = [];
+
+    /**
+     * @var array $canvas Canvas properties
+     */
+    protected $canvas2 = [];
 
     /**
      * @todo Simplify properties
@@ -24,17 +38,8 @@ abstract class AbstractResize
     protected $width;
     protected $height;
 
-    protected $dest_width;
-    protected $dest_height;
-
     protected $spacing_x;
     protected $spacing_y;
-
-    protected $src_width;
-    protected $src_height;
-    protected $src_file;
-    protected $src_path;
-    protected $src_aspect_ratio;
 
     protected $canvas;
     protected $copy;
@@ -95,8 +100,8 @@ abstract class AbstractResize
 
         if ($this->invalid === 0) {
 
-            $this->width = $width;
-            $this->height = $height;
+            $this->canvas2['width'] = $width;
+            $this->canvas2['height'] = $height;
             $this->quality = $quality;
             $this->canvas_color = $canvas_color;
             $this->maintain_aspect = $maintain_aspect;
@@ -158,11 +163,11 @@ abstract class AbstractResize
     {
         $dimensions = getimagesize($path . $file);
 
-        $this->src_width = $dimensions[0];
-        $this->src_height = $dimensions[1];
-        $this->src_aspect_ratio = $this->src_width / $this->src_height;
+        $this->source['width'] = intval($dimensions[0]);
+        $this->source['height'] = intval($dimensions[1]);
+        $this->source['aspect_ratio'] = floatval($this->source['width'] / $this->source['height']);
 
-        if ($this->width > $this->src_width || $this->height > $this->src_height) {
+        if ($this->canvas2['width'] > $this->source['width'] || $this->canvas2['height'] > $this->source['height']) {
             throw new Exception("The options are set to upscale the image, this class 
              does not support that.");
         }
@@ -190,10 +195,10 @@ abstract class AbstractResize
 			otherwise newly created image conflit with source image");
         }
 
-        if ($this->src_aspect_ratio > 1) {
+        if ($this->source['aspect_ratio'] > 1.00) {
             $this->resizeLandscape();
         } else {
-            if ($this->src_aspect_ratio == 1) {
+            if ($this->source['aspect_ratio'] === 1.00) {
                 $this->resizeSquare();
             } else {
                 $this->resizePortrait();
@@ -205,8 +210,8 @@ abstract class AbstractResize
 
             $this->spacingY();
         } else {
-            $this->dest_width = $this->width;
-            $this->dest_height = $this->height;
+            $this->destination['width'] = $this->canvas2['width'];
+            $this->destination['height'] = $this->canvas2['height'];
         }
 
         $this->create();
@@ -221,15 +226,15 @@ abstract class AbstractResize
     protected function resizeLandscape()
     {
         // Set width and then calculate height
-        $this->dest_width = $this->width;
-        $this->dest_height = intval(round(
-            $this->dest_width / $this->src_aspect_ratio, 0));
+        $this->destination['width'] = $this->canvas2['width'];
+        $this->destination['height'] = intval(round(
+            $this->destination['width'] / $this->source['aspect_ratio'], 0));
 
         // If height larger than requested, set and calculate new width
-        if ($this->dest_height > $this->height) {
-            $this->dest_height = $this->height;
-            $this->dest_width = intval(round(
-                $this->dest_height * $this->src_aspect_ratio, 0));
+        if ($this->destination['height'] > $this->canvas2['height']) {
+            $this->destination['height'] = $this->canvas2['height'];
+            $this->destination['width'] = intval(round(
+                $this->destination['height'] * $this->source['aspect_ratio'], 0));
         }
     }
 
@@ -240,21 +245,21 @@ abstract class AbstractResize
      */
     protected function resizeSquare()
     {
-        if ($this->height == $this->width) {
+        if ($this->canvas2['height'] == $this->canvas2['width']) {
             // Requesting a sqaure image, set destination sizes, no spacing
-            $this->dest_width = $this->width;
-            $this->dest_height = $this->height;
+            $this->destination['width'] = $this->canvas2['width'];
+            $this->destination['height'] = $this->canvas2['height'];
         } else {
-            if ($this->width > $this->height) {
+            if ($this->canvas2['width'] > $this->canvas2['height']) {
                 // Requested landscapoe image, set height as dimension, will need
                 // horizontal spacing
-                $this->dest_width = $this->height;
-                $this->dest_height = $this->height;
+                $this->destination['width'] = $this->canvas2['height'];
+                $this->destination['height'] = $this->canvas2['height'];
             } else {
                 // Requested portrait image, set width as dimension, will need
                 // vertical spacing
-                $this->dest_height = $this->width;
-                $this->dest_width = $this->width;
+                $this->destination['height'] = $this->canvas2['width'];
+                $this->destination['width'] = $this->canvas2['width'];
             }
         }
     }
@@ -268,15 +273,15 @@ abstract class AbstractResize
     protected function resizePortrait()
     {
         // Set height and then calculate width
-        $this->dest_height = $this->height;
-        $this->dest_width = intval(round(
-            $this->dest_height * $this->src_aspect_ratio, 0));
+        $this->destination['height'] = $this->canvas2['height'];
+        $this->destination['width'] = intval(round(
+            $this->destination['height'] * $this->source['aspect_ratio'], 0));
 
         // If width larger than requested, set and calculate new height
-        if ($this->dest_width > $this->width) {
-            $this->dest_width = $this->width;
-            $this->dest_height = intval(round(
-                $this->dest_width / $this->src_aspect_ratio, 0));
+        if ($this->destination['width'] > $this->canvas2['width']) {
+            $this->destination['width'] = $this->canvas2['width'];
+            $this->destination['height'] = intval(round(
+                $this->destination['width'] / $this->source['aspect_ratio'], 0));
         }
     }
 
@@ -290,8 +295,8 @@ abstract class AbstractResize
     {
         $this->spacing_x = 0;
 
-        if ($this->dest_width < $this->width) {
-            $width_difference = $this->width - $this->dest_width;
+        if ($this->destination['width'] < $this->canvas2['width']) {
+            $width_difference = $this->canvas2['width'] - $this->destination['width'];
 
             if ($width_difference % 2 == 0) {
                 $this->spacing_x = $width_difference / 2;
@@ -315,9 +320,9 @@ abstract class AbstractResize
     {
         $this->spacing_y = 0;
 
-        if ($this->dest_height < $this->height) {
+        if ($this->destination['height'] < $this->canvas2['height']) {
 
-            $height_difference = $this->height - $this->dest_height;
+            $height_difference = $this->canvas2['height'] - $this->destination['height'];
 
             if ($height_difference % 2 == 0) {
                 $this->spacing_y = $height_difference / 2;
