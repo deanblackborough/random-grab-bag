@@ -21,41 +21,14 @@ abstract class AbstractResize
     protected $source = [];
 
     /**
-     * @var array $destination Destination image properties
+     * @var array $destination Intermediate image properties
      */
-    protected $destination = [];
+    protected $intermediate = [];
 
     /**
-     * @var array $canvas Canvas properties
+     * @var array $canvas Final canvas properties
      */
-    protected $canvas2 = [];
-
-    /**
-     * @todo Simplify properties
-     * @todo Split out some of the base logic
-     */
-
-    protected $width;
-    protected $height;
-
-    protected $spacing_x;
-    protected $spacing_y;
-
-    protected $canvas;
-    protected $copy;
-
-    protected $maintain_aspect;
-
-    protected $canvas_color;
-    protected $quality;
-
-    protected $mime;
-    protected $extension;
-
-    protected $suffix = '-thumb';
-
-    protected $invalid;
-    protected $errors = array();
+    protected $canvas = [];
 
     /**
      * Set the required options for the image resizer. To allow batch processing we set the
@@ -70,7 +43,7 @@ abstract class AbstractResize
      * true padding will be calculated and added around a best fit re-sampled image, otherwise,
      * the image will be stretched to fit the desired canvas
      *
-     * @throws InvalidArgumentException If any of the params are invalid we throw an exception
+     * @throws \InvalidArgumentException If any of the params are invalid we throw an exception
      */
     public function __construct(
         int $width,
@@ -80,34 +53,26 @@ abstract class AbstractResize
         bool $maintain_aspect = false
     ) {
         if ($width < 1) {
-            $this->invalid++;
-            $this->errors[] = 'Width not valid, must be greater than 0';
+            throw new \InvalidArgumentException('Width not valid, must be greater than 0');
         }
 
         if ($height < 1) {
-            $this->invalid++;
-            $this->errors[] = 'Height not valid, must be greater than 0';
+            throw new \InvalidArgumentException('Height not valid, must be greater than 0');
         }
 
         if ($this->colorIndexValid('r', $canvas_color) === false ||
             $this->colorIndexValid('g', $canvas_color) === false ||
             $this->colorIndexValid('b', $canvas_color) === false
         ) {
-            $this->invalid++;
-            $this->errors[] = 'Canvas colour array invalid, it should contain three indexes, r, 
-                g and b and each should have a value between 0 and 255';
+            throw new \InvalidArgumentException('Canvas colour array invalid, it should contain three indexes, r, g 
+                and b and each should have a value between 0 and 255');
         }
 
-        if ($this->invalid === 0) {
-
-            $this->canvas2['width'] = $width;
-            $this->canvas2['height'] = $height;
-            $this->quality = $quality;
-            $this->canvas_color = $canvas_color;
-            $this->maintain_aspect = $maintain_aspect;
-        } else {
-            throw new \InvalidArgumentException("Error(s) creating resize object: " . implode(' - ', $this->errors));
-        }
+        $this->canvas['width'] = $width;
+        $this->canvas['height'] = $height;
+        $this->canvas['quality'] = $quality;
+        $this->canvas['color'] = $canvas_color;
+        $this->intermediate['maintain_aspect'] = $maintain_aspect;
     }
 
     /**
@@ -136,12 +101,14 @@ abstract class AbstractResize
      * @param string $path Full patch to image
      *
      * @return void
-     * @throws Exception Throws an exception if the image can't be loaded
+     * @throws \Exception Throws an exception if the image can't be loaded
      */
     public function loadImage(string $file, string $path = '')
     {
         if (file_exists($path . $file) === true) {
-            $this->sourceDimensions($path, $file);
+            $this->source['path'] = $path;
+            $this->source['file'] = $file;
+            $this->sourceDimensions();
         } else {
             throw new \Exception("File couldn't be found, supplied 
 			destination: '" . $path . $file . "'");
@@ -153,210 +120,202 @@ abstract class AbstractResize
      * to ensure that the image is being resized down, currently we don't support upscaling the
      * image
      *
-     * @param string $path
-     * @param string $file
-     *
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
-    protected function sourceDimensions(string $path, string $file)
+    protected function sourceDimensions()
     {
-        $dimensions = getimagesize($path . $file);
+        $dimensions = getimagesize($this->source['path'] . $this->source['file']);
 
         $this->source['width'] = intval($dimensions[0]);
         $this->source['height'] = intval($dimensions[1]);
         $this->source['aspect_ratio'] = floatval($this->source['width'] / $this->source['height']);
 
-        if ($this->canvas2['width'] > $this->source['width'] || $this->canvas2['height'] > $this->source['height']) {
-            throw new Exception("The options are set to upscale the image, this class 
+        if ($this->canvas['width'] > $this->source['width'] || $this->canvas['height'] > $this->source['height']) {
+            throw new \Exception("The options are set to upscale the image, this class 
              does not support that.");
         }
     }
 
     /**
-     * Resize, calculate the size for the resized image, the the maintain
-     * aspect ratio value is set to true a best fit size is calculated and then
-     * the required x and y spacing is calculated for when the image is copied
-     * onto the canvas
+     * Resize the image
      *
-     * Although the suffix for the new image can be defined the path cannot be
-     * changed, that is outside the scope of this class, it is down to the
-     * client developer to create directories and then oevrride the save method
+     * Calculates the size of the resized image taking into account all the set options including
+     * spacing if the existing aspect ratio is to be retained and then calls the create method in
+     * the relevant format based class
      *
-     * @param string $suffix Suffix for newly created image
-     * @return void|Exception Throws an exception if no suffic is supplied
+     * @param string $suffix The suffix for the new image
+     *
+     * @return void
+     * @throws \Exception Throws an exception if unable to create image
      */
     public function resize($suffix = '-thumb')
     {
-        if (strlen(trim($suffix)) > 0) {
-            $this->suffix = trim($suffix);
-        } else {
-            throw new InvalidArgumentException("Suffix must be defined 
-			otherwise newly created image conflit with source image");
-        }
+        $this->canvas['suffix'] = trim($suffix);
 
-        if ($this->source['aspect_ratio'] > 1.00) {
-            $this->resizeLandscape();
-        } else {
-            if ($this->source['aspect_ratio'] === 1.00) {
-                $this->resizeSquare();
+        if ($this->intermediate['maintain_aspect'] === true) {
+            if ($this->source['aspect_ratio'] > 1.00) {
+                $this->intermediateSizeLandscape();
             } else {
-                $this->resizePortrait();
+                if ($this->source['aspect_ratio'] === 1.00) {
+                    $this->intermediateSizeSquare();
+                } else {
+                    $this->intermediateSizePortrait();
+                }
             }
-        }
 
-        if ($this->maintain_aspect == true) {
-            $this->spacingX();
-
-            $this->spacingY();
+            $this->canvasSpacingX();
+            $this->canvasSpacingY();
         } else {
-            $this->destination['width'] = $this->canvas2['width'];
-            $this->destination['height'] = $this->canvas2['height'];
+            $this->intermediate['width'] = $this->canvas['width'];
+            $this->intermediate['height'] = $this->canvas['height'];
         }
 
         $this->create();
     }
 
     /**
-     * Source image is a landscapoe based image, assume resizing to requested
-     * width and then modify the values are required
+     * The source image is landscape, maintaining aspect ratio calculate the intermediate
+     * image height and width
      *
      * @return void
      */
-    protected function resizeLandscape()
+    protected function intermediateSizeLandscape()
     {
         // Set width and then calculate height
-        $this->destination['width'] = $this->canvas2['width'];
-        $this->destination['height'] = intval(round(
-            $this->destination['width'] / $this->source['aspect_ratio'], 0));
+        $this->intermediate['width'] = $this->canvas['width'];
+        $this->intermediate['height'] = intval(round(
+            $this->intermediate['width'] / $this->source['aspect_ratio'], 0));
 
         // If height larger than requested, set and calculate new width
-        if ($this->destination['height'] > $this->canvas2['height']) {
-            $this->destination['height'] = $this->canvas2['height'];
-            $this->destination['width'] = intval(round(
-                $this->destination['height'] * $this->source['aspect_ratio'], 0));
+        if ($this->intermediate['height'] > $this->canvas['height']) {
+            $this->intermediate['height'] = $this->canvas['height'];
+            $this->intermediate['width'] = intval(round(
+                $this->intermediate['height'] * $this->source['aspect_ratio'], 0));
         }
     }
 
     /**
-     * Source image is a square, fit as appropriate
+     * The source image is landscape, fit as appropriate
      *
      * @return void
      */
-    protected function resizeSquare()
+    protected function intermediateSizeSquare()
     {
-        if ($this->canvas2['height'] == $this->canvas2['width']) {
-            // Requesting a sqaure image, set destination sizes, no spacing
-            $this->destination['width'] = $this->canvas2['width'];
-            $this->destination['height'] = $this->canvas2['height'];
+        if ($this->canvas['height'] === $this->canvas['width']) {
+            $this->intermediate['width'] = $this->canvas['width'];
+            $this->intermediate['height'] = $this->canvas['height'];
         } else {
-            if ($this->canvas2['width'] > $this->canvas2['height']) {
-                // Requested landscapoe image, set height as dimension, will need
-                // horizontal spacing
-                $this->destination['width'] = $this->canvas2['height'];
-                $this->destination['height'] = $this->canvas2['height'];
+            if ($this->canvas['width'] > $this->canvas['height']) {
+                $this->intermediate['width'] = $this->canvas['height'];
+                $this->intermediate['height'] = $this->canvas['height'];
             } else {
-                // Requested portrait image, set width as dimension, will need
-                // vertical spacing
-                $this->destination['height'] = $this->canvas2['width'];
-                $this->destination['width'] = $this->canvas2['width'];
+                $this->intermediate['height'] = $this->canvas['width'];
+                $this->intermediate['width'] = $this->canvas['width'];
             }
         }
     }
 
     /**
-     * Source image is a portrait based image, assume resizing to requested
-     * height and then modify the values are required
+     * The source image is portrait, maintaining aspect ratio calculate the intermediate
+     * image height and width
      *
      * @return void
      */
-    protected function resizePortrait()
+    protected function intermediateSizePortrait()
     {
         // Set height and then calculate width
-        $this->destination['height'] = $this->canvas2['height'];
-        $this->destination['width'] = intval(round(
-            $this->destination['height'] * $this->source['aspect_ratio'], 0));
+        $this->intermediate['height'] = $this->canvas['height'];
+        $this->intermediate['width'] = intval(round(
+            $this->intermediate['height'] * $this->source['aspect_ratio'], 0));
 
         // If width larger than requested, set and calculate new height
-        if ($this->destination['width'] > $this->canvas2['width']) {
-            $this->destination['width'] = $this->canvas2['width'];
-            $this->destination['height'] = intval(round(
-                $this->destination['width'] / $this->source['aspect_ratio'], 0));
+        if ($this->intermediate['width'] > $this->canvas['width']) {
+            $this->intermediate['width'] = $this->canvas['width'];
+            $this->intermediate['height'] = intval(round(
+                $this->intermediate['width'] / $this->source['aspect_ratio'], 0));
         }
     }
 
     /**
-     * Calculate the x spacing if the width of the resampled image will be
-     * smaller than the width defined for the new thumbnail
+     * Calculate any required x canvas spacing, necessary if the intermediate image will be
+     * smaller than the canvas
      *
      * @return void
      */
-    protected function spacingX()
+    protected function canvasSpacingX()
     {
-        $this->spacing_x = 0;
+        $this->canvas['spacing']['x'] = 0;
 
-        if ($this->destination['width'] < $this->canvas2['width']) {
-            $width_difference = $this->canvas2['width'] - $this->destination['width'];
+        if ($this->intermediate['width'] < $this->canvas['width']) {
+            $difference = $this->canvas['width'] - $this->intermediate['width'];
 
-            if ($width_difference % 2 == 0) {
-                $this->spacing_x = $width_difference / 2;
+            if ($difference % 2 === 0) {
+                $this->canvas['spacing']['x'] = $difference / 2;
             } else {
-                if ($width_difference > 1) {
-                    $this->spacing_x = ($width_difference - 1) / 2 + 1;
+                if ($difference > 1) {
+                    $this->canvas['spacing']['x'] = ($difference - 1) / 2 + 1;
                 } else {
-                    $this->spacing_x = 1;
+                    $this->canvas['spacing']['x'] = 1;
                 }
             }
         }
     }
 
     /**
-     * Calculate the y spacing if the height of the resampled image will be
-     * smaller than the height defined for the new thumbnail
+     * Calculate any required y canvas spacing, necessary if the intermediate image will be
+     * smaller than the canvas
      *
      * @return void
      */
-    protected function spacingY()
+    protected function canvasSpacingY()
     {
-        $this->spacing_y = 0;
+        $this->canvas['spacing']['y'] = 0;
 
-        if ($this->destination['height'] < $this->canvas2['height']) {
+        if ($this->intermediate['height'] < $this->canvas['height']) {
 
-            $height_difference = $this->canvas2['height'] - $this->destination['height'];
+            $difference = $this->canvas['height'] - $this->intermediate['height'];
 
-            if ($height_difference % 2 == 0) {
-                $this->spacing_y = $height_difference / 2;
+            if ($difference % 2 === 0) {
+                $this->canvas['spacing']['y'] = $difference / 2;
             } else {
-                if ($height_difference > 1) {
-                    $this->spacing_y = ($height_difference - 1) / 2 + 1;
+                if ($difference > 1) {
+                    $this->canvas['spacing']['y'] = ($difference - 1) / 2 + 1;
                 } else {
-                    $this->spacing_y = 1;
+                    $this->canvas['spacing']['y'] = 1;
                 }
             }
         }
     }
 
     /**
-     * Destroy the image resources
+     * Destroy the created image resources
      *
      * @return void
      */
     public function __destruct()
     {
-        if (isset($this->canvas) == true) {
-            imagedestroy($this->canvas);
+        if (isset($this->canvas['canvas']) === true) {
+            imagedestroy($this->canvas['canvas']);
         }
-        if (isset($this->copy) == true) {
-            imagedestroy($this->copy);
+        if (isset($this->intermediate['copy']) === true) {
+            imagedestroy($this->intermediate['copy']);
         }
     }
 
     /**
-     * Required process method in child classes, this method creates canvas,
-     * copies and then saves new image
+     * Create the image in the required format
      *
-     * @return void|Exception Throws an exception if there was an error
-     *                        either creating or saving the new image
+     * @return void
+     * @throws \Exception Throws an exception if there was an error creating or saving the new image
      */
     abstract protected function create();
+
+    /**
+     * Attempt to save the new image
+     *
+     * @return boolean
+     * @throws \Exception Throws an exception if the save fails
+     */
+    abstract protected function save();
 }

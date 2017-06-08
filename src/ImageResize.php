@@ -12,11 +12,5 @@ namespace DBlackborough\GrabBag;
  */
 class ImageResize
 {
-    /**
-     * ImageResize constructor.
-     */
-    public function __construct()
-    {
 
-    }
 }
