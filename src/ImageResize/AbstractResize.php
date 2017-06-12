@@ -38,10 +38,10 @@ abstract class AbstractResize
      * @param integer $height Required height for the new image
      * @param integer $quality Quality or compression level for new image, this value depends
      * on the desired format, the format classes will document the acceptable values
-     * @param array $canvas_color Canvas background color, passed in as an rgb array
      * @param boolean $maintain_aspect Maintain aspect ratio of the original image? If set to
      * true padding will be calculated and added around a best fit re-sampled image, otherwise,
      * the image will be stretched to fit the desired canvas
+     * @param array $canvas_color Canvas background color, passed in as an rgb array
      *
      * @throws \InvalidArgumentException If any of the params are invalid we throw an exception
      */
@@ -49,8 +49,8 @@ abstract class AbstractResize
         int $width,
         int $height,
         int $quality,
-        array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255),
-        bool $maintain_aspect = false
+        bool $maintain_aspect = false,
+        array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
     ) {
         if ($width < 1) {
             throw new \InvalidArgumentException('Width not valid, must be greater than 0');
@@ -163,13 +163,13 @@ abstract class AbstractResize
                     $this->intermediateSizePortrait();
                 }
             }
-
-            $this->canvasSpacingX();
-            $this->canvasSpacingY();
         } else {
             $this->intermediate['width'] = $this->canvas['width'];
             $this->intermediate['height'] = $this->canvas['height'];
         }
+
+        $this->canvasSpacingX();
+        $this->canvasSpacingY();
 
         $this->create();
     }

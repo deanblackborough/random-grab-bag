@@ -22,10 +22,10 @@ class Jpeg extends AbstractResize
      * @param integer $height Required height for the new image
      * @param integer $quality Quality or compression level, must be a value between 1 and 100
      * on the desired format, the format classes will document the acceptable values
-     * @param array $canvas_color Canvas background color, passed in as an rgb array
      * @param boolean $maintain_aspect Maintain aspect ratio of the original image? If set to
      * true padding will be calculated and added around a best fit re-sampled image, otherwise,
      * the image will be stretched to fit the desired canvas
+     * @param array $canvas_color Canvas background color, passed in as an rgb array
      *
      * @throws \InvalidArgumentException If any of the params are invalid we throw an exception
      */
@@ -33,14 +33,14 @@ class Jpeg extends AbstractResize
         int $width,
         int $height,
         int $quality,
-        array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255),
-        $maintain_aspect = false
+        $maintain_aspect = false,
+        array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
     ) {
         if ($quality < 1 || $quality > 100) {
             throw new \InvalidArgumentException('Quality must be a value between 1 and 100');
         }
 
-        parent::__construct($width, $height, $quality, $canvas_color, $maintain_aspect);
+        parent::__construct($width, $height, $quality, $maintain_aspect, $canvas_color);
     }
 
     /**
@@ -95,8 +95,8 @@ class Jpeg extends AbstractResize
      */
     protected function save()
     {
-        return imagejpeg($this->canvas['canvas'], $this->canvas['path'] .
-            str_replace($this->canvas['extension'], $this->canvas['suffix'] . $this->canvas['extension'], $this->canvas['file']),
+        return imagejpeg($this->canvas['canvas'], $this->source['path'] .
+            str_replace('.jpg', $this->canvas['suffix'] . '.jpg', $this->source['file']),
             $this->canvas['quality']);
     }
 }
