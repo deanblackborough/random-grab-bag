@@ -46,10 +46,10 @@ class Jpeg extends AbstractResize
     /**
      * Create the image
      *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if any step fails
      */
-    public function resize()
+    public function resize() : AbstractResize
     {
         $this->canvas['canvas'] = imagecreatetruecolor($this->canvas['width'], $this->canvas['height']);
         if ($this->canvas['canvas'] === false) {
@@ -79,6 +79,8 @@ class Jpeg extends AbstractResize
         if($result === false) {
             throw new \Exception('Call to imagecopyresampled failed');
         }
+
+        return $this;
     }
 
     /**
@@ -86,7 +88,7 @@ class Jpeg extends AbstractResize
      *
      * @param string $suffix Suffix for filename
      *
-     * @return boolean
+     * @return void
      * @throws \Exception Throws an exception if the save fails
      */
     public function save($suffix)

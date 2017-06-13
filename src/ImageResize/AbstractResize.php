@@ -83,7 +83,7 @@ abstract class AbstractResize
      *
      * @return boolean
      */
-    private function colorIndexValid(string $index, array $color)
+    private function colorIndexValid(string $index, array $color) : bool
     {
         if (array_key_exists($index, $color) === true &&
             $color[$index] >= 0 && $color[$index] <= 255
@@ -100,10 +100,10 @@ abstract class AbstractResize
      * @param string $file File name and extension
      * @param string $path Full patch to image
      *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if the image can't be loaded
      */
-    public function loadImage(string $file, string $path = '')
+    public function loadImage(string $file, string $path = '') : AbstractResize
     {
         if (file_exists($path . $file) === true) {
             $this->source['path'] = $path;
@@ -113,6 +113,8 @@ abstract class AbstractResize
             throw new \Exception("File couldn't be found, supplied 
 			destination: '" . $path . $file . "'");
         }
+
+        return $this;
     }
 
     /**
@@ -141,10 +143,10 @@ abstract class AbstractResize
      * Process the request, generate the size required for the image along with the
      * canvas spacing
      *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if unable to create image
      */
-    public function process()
+    public function process() : AbstractResize
     {
         if ($this->intermediate['maintain_aspect'] === true) {
             if ($this->source['aspect_ratio'] > 1.00) {
@@ -163,6 +165,8 @@ abstract class AbstractResize
 
         $this->canvasSpacingX();
         $this->canvasSpacingY();
+
+        return $this;
     }
 
     /**
@@ -297,17 +301,17 @@ abstract class AbstractResize
     /**
      * Create the image in the required format
      *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if there was an error creating or saving the new image
      */
-    abstract public function resize();
+    abstract public function resize() : AbstractResize;
 
     /**
      * Attempt to save the new image
      *
      * @param string $suffix Suffix for filename
      *
-     * @return boolean
+     * @return void
      * @throws \Exception Throws an exception if the save fails
      */
     abstract public function save($suffix);
