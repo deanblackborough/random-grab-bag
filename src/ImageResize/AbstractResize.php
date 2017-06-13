@@ -114,6 +114,9 @@ abstract class AbstractResize
 			destination: '" . $path . $file . "'");
         }
 
+        // Reset the processed status when a new image is loaded
+        $this->processed = false;
+
         return $this;
     }
 
@@ -165,6 +168,8 @@ abstract class AbstractResize
 
         $this->canvasSpacingX();
         $this->canvasSpacingY();
+
+        $this->processed = true;
 
         return $this;
     }
@@ -299,6 +304,39 @@ abstract class AbstractResize
     }
 
     /**
+     * Return all the info for the image that will/has be/been created
+     *
+     * @return array
+     * @throws \Exception Throws an exception if called before process()
+     */
+    public function getInfo() : array
+    {
+        if ($this->processed === true) {
+            return [
+                'canvas' => [
+                    'width' => $this->canvas['width'],
+                    'height' => $this->canvas['height'],
+                    'color' => $this->canvas['color']
+                ],
+                'resized-image' => [
+                    'width' => $this->intermediate['width'],
+                    'height' => $this->intermediate['height']
+                ],
+                'canvas-placement' => [
+                    'x' => $this->canvas['spacing']['x'],
+                    'y' => $this->canvas['spacing']['y']
+                ],
+                'resizer' => [
+                    'maintain-aspect-ratio' => $this->intermediate['maintain_aspect'],
+                    'quality' => $this->canvas['quality']
+                ]
+            ];
+        } else {
+            throw new \Exception('Unable to getInfo(), process() not called');
+        }
+    }
+
+    /**
      * Create the image in the required format
      *
      * @return AbstractResize
@@ -311,8 +349,8 @@ abstract class AbstractResize
      *
      * @param string $suffix Suffix for filename
      *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    abstract public function save($suffix);
+    abstract public function save($suffix) : AbstractResize;
 }

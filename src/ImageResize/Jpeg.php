@@ -86,10 +86,10 @@ class Jpeg extends AbstractResize
      *
      * @param string $suffix Suffix for filename
      *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    public function save($suffix)
+    public function save($suffix) : AbstractResize
     {
         $result = imagejpeg($this->canvas['canvas'], $this->source['path'] .
             str_replace('.jpg', $suffix . '.jpg', $this->source['file']),
@@ -98,5 +98,7 @@ class Jpeg extends AbstractResize
         if ($result === false) {
             throw new \Exception('Unable to save new image');
         }
+
+        return $this;
     }
 }

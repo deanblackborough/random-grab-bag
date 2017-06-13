@@ -14,3 +14,5 @@ $resizer->loadImage('tower-bridge-1280-760.jpg')->
     process()->
     create()->
     save('-top-and-bottom-bar');
+
+var_dump($resizer->getInfo());
