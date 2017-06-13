@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace DBlackborough\GrabBag\ImageResize;
 
-use Exception;
-
 /**
  * Resize a jpeg image
  *
@@ -49,26 +47,26 @@ class Jpeg extends AbstractResize
      * @return AbstractResize
      * @throws \Exception Throws an exception if any step fails
      */
-    public function resize() : AbstractResize
+    public function create() : AbstractResize
     {
         $this->canvas['canvas'] = imagecreatetruecolor($this->canvas['width'], $this->canvas['height']);
         if ($this->canvas['canvas'] === false) {
-            throw new Exception('Call to imagecreatetruecolor failed');
+            throw new \Exception('Call to imagecreatetruecolor failed');
         }
 
         $fill_color = imagecolorallocate($this->canvas['canvas'], $this->canvas['color']['r'],
             $this->canvas['color']['g'], $this->canvas['color']['b']);
         if ($fill_color === false) {
-            throw new Exception('Call to imagecolorallocate failed');
+            throw new \Exception('Call to imagecolorallocate failed');
         }
 
         if (imagefill($this->canvas['canvas'], 0, 0, $fill_color) === false) {
-            throw new Exception('Call to imagefill failed');
+            throw new \Exception('Call to imagefill failed');
         };
 
         $this->intermediate['copy'] = imagecreatefromjpeg($this->source['path'] . $this->source['file']);
         if ($this->intermediate['copy'] === false) {
-            throw new Exception('Call to imagecreatefromjpeg failed');
+            throw new \Exception('Call to imagecreatefromjpeg failed');
         }
 
         $result = imagecopyresampled($this->canvas['canvas'], $this->intermediate['copy'],

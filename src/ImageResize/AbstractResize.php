@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace DBlackborough\GrabBag\ImageResize;
 
-use InvalidArgumentException;
-use Exception;
-
 /**
  * Base class for the format base resize classes
  *
@@ -29,6 +26,9 @@ abstract class AbstractResize
      * @var array $canvas Final canvas properties
      */
     protected $canvas = [];
+
+    protected $processed = false;
+    protected $resized = false;
 
     /**
      * Set the required options for the image resizer. To allow batch processing we set the
@@ -304,7 +304,7 @@ abstract class AbstractResize
      * @return AbstractResize
      * @throws \Exception Throws an exception if there was an error creating or saving the new image
      */
-    abstract public function resize() : AbstractResize;
+    abstract public function create() : AbstractResize;
 
     /**
      * Attempt to save the new image
