@@ -138,21 +138,14 @@ abstract class AbstractResize
     }
 
     /**
-     * Resize the image
-     *
-     * Calculates the size of the resized image taking into account all the set options including
-     * spacing if the existing aspect ratio is to be retained and then calls the create method in
-     * the relevant format based class
-     *
-     * @param string $suffix The suffix for the new image
+     * Process the request, generate the size required for the image along with the
+     * canvas spacing
      *
      * @return void
      * @throws \Exception Throws an exception if unable to create image
      */
-    public function resize($suffix = '-thumb')
+    public function process()
     {
-        $this->canvas['suffix'] = trim($suffix);
-
         if ($this->intermediate['maintain_aspect'] === true) {
             if ($this->source['aspect_ratio'] > 1.00) {
                 $this->intermediateSizeLandscape();
@@ -170,8 +163,6 @@ abstract class AbstractResize
 
         $this->canvasSpacingX();
         $this->canvasSpacingY();
-
-        $this->create();
     }
 
     /**
@@ -309,13 +300,15 @@ abstract class AbstractResize
      * @return void
      * @throws \Exception Throws an exception if there was an error creating or saving the new image
      */
-    abstract protected function create();
+    abstract public function resize();
 
     /**
      * Attempt to save the new image
      *
+     * @param string $suffix Suffix for filename
+     *
      * @return boolean
      * @throws \Exception Throws an exception if the save fails
      */
-    abstract protected function save();
+    abstract public function save($suffix);
 }

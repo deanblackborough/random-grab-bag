@@ -49,7 +49,7 @@ class Jpeg extends AbstractResize
      * @return void
      * @throws \Exception Throws an exception if any step fails
      */
-    protected function create()
+    public function resize()
     {
         $this->canvas['canvas'] = imagecreatetruecolor($this->canvas['width'], $this->canvas['height']);
         if ($this->canvas['canvas'] === false) {
@@ -76,13 +76,7 @@ class Jpeg extends AbstractResize
             $this->intermediate['width'], $this->intermediate['height'], $this->source['width'],
             $this->source['height']);
 
-        if($result === true) {
-            $result = $this->save();
-
-            if($result === FALSE) {
-                throw new \Exception('Unable to save new image');
-            }
-        } else {
+        if($result === false) {
             throw new \Exception('Call to imagecopyresampled failed');
         }
     }
@@ -90,13 +84,19 @@ class Jpeg extends AbstractResize
     /**
      * Attempt to save the new image
      *
+     * @param string $suffix Suffix for filename
+     *
      * @return boolean
      * @throws \Exception Throws an exception if the save fails
      */
-    protected function save()
+    public function save($suffix)
     {
-        return imagejpeg($this->canvas['canvas'], $this->source['path'] .
-            str_replace('.jpg', $this->canvas['suffix'] . '.jpg', $this->source['file']),
+        $result = imagejpeg($this->canvas['canvas'], $this->source['path'] .
+            str_replace('.jpg', $suffix . '.jpg', $this->source['file']),
             $this->canvas['quality']);
+
+        if ($result === false) {
+            throw new \Exception('Unable to save new image');
+        }
     }
 }
