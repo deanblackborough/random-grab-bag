@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace DBlackborough\GrabBag\ImageResize;
 
-use InvalidArgumentException;
-use Exception;
-
 /**
  * Base class for the format base resize classes
  *
@@ -29,6 +26,9 @@ abstract class AbstractResize
      * @var array $canvas Final canvas properties
      */
     protected $canvas = [];
+
+    protected $processed = false;
+    protected $resized = false;
 
     /**
      * Set the required options for the image resizer. To allow batch processing we set the
@@ -83,7 +83,7 @@ abstract class AbstractResize
      *
      * @return boolean
      */
-    private function colorIndexValid(string $index, array $color)
+    private function colorIndexValid(string $index, array $color) : bool
     {
         if (array_key_exists($index, $color) === true &&
             $color[$index] >= 0 && $color[$index] <= 255
@@ -100,10 +100,10 @@ abstract class AbstractResize
      * @param string $file File name and extension
      * @param string $path Full patch to image
      *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if the image can't be loaded
      */
-    public function loadImage(string $file, string $path = '')
+    public function loadImage(string $file, string $path = '') : AbstractResize
     {
         if (file_exists($path . $file) === true) {
             $this->source['path'] = $path;
@@ -113,6 +113,11 @@ abstract class AbstractResize
             throw new \Exception("File couldn't be found, supplied 
 			destination: '" . $path . $file . "'");
         }
+
+        // Reset the processed status when a new image is loaded
+        $this->processed = false;
+
+        return $this;
     }
 
     /**
@@ -138,21 +143,14 @@ abstract class AbstractResize
     }
 
     /**
-     * Resize the image
+     * Process the request, generate the size required for the image along with the
+     * canvas spacing
      *
-     * Calculates the size of the resized image taking into account all the set options including
-     * spacing if the existing aspect ratio is to be retained and then calls the create method in
-     * the relevant format based class
-     *
-     * @param string $suffix The suffix for the new image
-     *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if unable to create image
      */
-    public function resize($suffix = '-thumb')
+    public function process() : AbstractResize
     {
-        $this->canvas['suffix'] = trim($suffix);
-
         if ($this->intermediate['maintain_aspect'] === true) {
             if ($this->source['aspect_ratio'] > 1.00) {
                 $this->intermediateSizeLandscape();
@@ -171,7 +169,9 @@ abstract class AbstractResize
         $this->canvasSpacingX();
         $this->canvasSpacingY();
 
-        $this->create();
+        $this->processed = true;
+
+        return $this;
     }
 
     /**
@@ -304,18 +304,53 @@ abstract class AbstractResize
     }
 
     /**
+     * Return all the info for the image that will/has be/been created
+     *
+     * @return array
+     * @throws \Exception Throws an exception if called before process()
+     */
+    public function getInfo() : array
+    {
+        if ($this->processed === true) {
+            return [
+                'canvas' => [
+                    'width' => $this->canvas['width'],
+                    'height' => $this->canvas['height'],
+                    'color' => $this->canvas['color']
+                ],
+                'resized-image' => [
+                    'width' => $this->intermediate['width'],
+                    'height' => $this->intermediate['height']
+                ],
+                'canvas-placement' => [
+                    'x' => $this->canvas['spacing']['x'],
+                    'y' => $this->canvas['spacing']['y']
+                ],
+                'resizer' => [
+                    'maintain-aspect-ratio' => $this->intermediate['maintain_aspect'],
+                    'quality' => $this->canvas['quality']
+                ]
+            ];
+        } else {
+            throw new \Exception('Unable to getInfo(), process() not called');
+        }
+    }
+
+    /**
      * Create the image in the required format
      *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if there was an error creating or saving the new image
      */
-    abstract protected function create();
+    abstract public function create() : AbstractResize;
 
     /**
      * Attempt to save the new image
      *
-     * @return boolean
+     * @param string $suffix Suffix for filename
+     *
+     * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    abstract protected function save();
+    abstract public function save($suffix) : AbstractResize;
 }

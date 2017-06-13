@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace DBlackborough\GrabBag\ImageResize;
 
-use Exception;
-
 /**
  * Resize a jpeg image
  *
@@ -46,29 +44,29 @@ class Jpeg extends AbstractResize
     /**
      * Create the image
      *
-     * @return void
+     * @return AbstractResize
      * @throws \Exception Throws an exception if any step fails
      */
-    protected function create()
+    public function create() : AbstractResize
     {
         $this->canvas['canvas'] = imagecreatetruecolor($this->canvas['width'], $this->canvas['height']);
         if ($this->canvas['canvas'] === false) {
-            throw new Exception('Call to imagecreatetruecolor failed');
+            throw new \Exception('Call to imagecreatetruecolor failed');
         }
 
         $fill_color = imagecolorallocate($this->canvas['canvas'], $this->canvas['color']['r'],
             $this->canvas['color']['g'], $this->canvas['color']['b']);
         if ($fill_color === false) {
-            throw new Exception('Call to imagecolorallocate failed');
+            throw new \Exception('Call to imagecolorallocate failed');
         }
 
         if (imagefill($this->canvas['canvas'], 0, 0, $fill_color) === false) {
-            throw new Exception('Call to imagefill failed');
+            throw new \Exception('Call to imagefill failed');
         };
 
         $this->intermediate['copy'] = imagecreatefromjpeg($this->source['path'] . $this->source['file']);
         if ($this->intermediate['copy'] === false) {
-            throw new Exception('Call to imagecreatefromjpeg failed');
+            throw new \Exception('Call to imagecreatefromjpeg failed');
         }
 
         $result = imagecopyresampled($this->canvas['canvas'], $this->intermediate['copy'],
@@ -76,27 +74,31 @@ class Jpeg extends AbstractResize
             $this->intermediate['width'], $this->intermediate['height'], $this->source['width'],
             $this->source['height']);
 
-        if($result === true) {
-            $result = $this->save();
-
-            if($result === FALSE) {
-                throw new \Exception('Unable to save new image');
-            }
-        } else {
+        if($result === false) {
             throw new \Exception('Call to imagecopyresampled failed');
         }
+
+        return $this;
     }
 
     /**
      * Attempt to save the new image
      *
-     * @return boolean
+     * @param string $suffix Suffix for filename
+     *
+     * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    protected function save()
+    public function save($suffix) : AbstractResize
     {
-        return imagejpeg($this->canvas['canvas'], $this->source['path'] .
-            str_replace('.jpg', $this->canvas['suffix'] . '.jpg', $this->source['file']),
+        $result = imagejpeg($this->canvas['canvas'], $this->source['path'] .
+            str_replace('.jpg', $suffix . '.jpg', $this->source['file']),
             $this->canvas['quality']);
+
+        if ($result === false) {
+            throw new \Exception('Unable to save new image');
+        }
+
+        return $this;
     }
 }

@@ -5,7 +5,6 @@
 ## Image resize
 
 * Add gif and png support to resize class.
-* Add in ability to fetch new image details prior to resizing image. (For testing)
 * Add ability to set the output folder.
 * Add ability to try and create the output folder.
 * Add chaining support so options can be set in a simpler way, optionally set in constructor.
