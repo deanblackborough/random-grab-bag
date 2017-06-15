@@ -337,6 +337,46 @@ abstract class AbstractResize
     }
 
     /**
+     * Create the canvas and fill with the canvas colour
+     *
+     * @throws \Exception
+     */
+    protected function createCanvas()
+    {
+        $this->canvas['canvas'] = imagecreatetruecolor($this->canvas['width'], $this->canvas['height']);
+        if ($this->canvas['canvas'] === false) {
+            throw new \Exception('Call to imagecreatetruecolor failed');
+        }
+
+        $fill_color = imagecolorallocate($this->canvas['canvas'], $this->canvas['color']['r'],
+            $this->canvas['color']['g'], $this->canvas['color']['b']);
+        if ($fill_color === false) {
+            throw new \Exception('Call to imagecolorallocate failed');
+        }
+
+        if (imagefill($this->canvas['canvas'], 0, 0, $fill_color) === false) {
+            throw new \Exception('Call to imagefill failed');
+        };
+    }
+
+    /**
+     * Resample the image copy
+     *
+     * @throws \Exception
+     */
+    protected function resampleCopy()
+    {
+        $result = imagecopyresampled($this->canvas['canvas'], $this->intermediate['copy'],
+            $this->canvas['spacing']['x'], $this->canvas['spacing']['y'], 0 ,0,
+            $this->intermediate['width'], $this->intermediate['height'], $this->source['width'],
+            $this->source['height']);
+
+        if($result === false) {
+            throw new \Exception('Call to imagecopyresampled failed');
+        }
+    }
+
+    /**
      * Create the image in the required format
      *
      * @return AbstractResize

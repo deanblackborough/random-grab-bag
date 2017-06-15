@@ -18,8 +18,8 @@ class Jpeg extends AbstractResize
      *
      * @param integer $width Required width for the new image
      * @param integer $height Required height for the new image
-     * @param integer $quality Quality or compression level, must be a value between 1 and 100
-     * on the desired format, the format classes will document the acceptable values
+     * @param integer $quality Quality or compression level, must be a value between 1 and 100,
+     * 100 being best quality
      * @param boolean $maintain_aspect Maintain aspect ratio of the original image? If set to
      * true padding will be calculated and added around a best fit re-sampled image, otherwise,
      * the image will be stretched to fit the desired canvas
@@ -49,33 +49,11 @@ class Jpeg extends AbstractResize
      */
     public function create() : AbstractResize
     {
-        $this->canvas['canvas'] = imagecreatetruecolor($this->canvas['width'], $this->canvas['height']);
-        if ($this->canvas['canvas'] === false) {
-            throw new \Exception('Call to imagecreatetruecolor failed');
-        }
-
-        $fill_color = imagecolorallocate($this->canvas['canvas'], $this->canvas['color']['r'],
-            $this->canvas['color']['g'], $this->canvas['color']['b']);
-        if ($fill_color === false) {
-            throw new \Exception('Call to imagecolorallocate failed');
-        }
-
-        if (imagefill($this->canvas['canvas'], 0, 0, $fill_color) === false) {
-            throw new \Exception('Call to imagefill failed');
-        };
+        $this->createCanvas();
 
         $this->intermediate['copy'] = imagecreatefromjpeg($this->source['path'] . $this->source['file']);
         if ($this->intermediate['copy'] === false) {
             throw new \Exception('Call to imagecreatefromjpeg failed');
-        }
-
-        $result = imagecopyresampled($this->canvas['canvas'], $this->intermediate['copy'],
-            $this->canvas['spacing']['x'], $this->canvas['spacing']['y'], 0 ,0,
-            $this->intermediate['width'], $this->intermediate['height'], $this->source['width'],
-            $this->source['height']);
-
-        if($result === false) {
-            throw new \Exception('Call to imagecopyresampled failed');
         }
 
         return $this;
