@@ -2,6 +2,11 @@
 
 Full changelog for the random grab bag
 
+### v0.03 - Png & Gif - 2017-05-15
+
+* Added png and gif support to image resize.
+* Minor refactoring to reduce duplication.
+
 ### v0.02 - Chaining - 2017-06-14
 
 * Added method chaining to simplify usage.

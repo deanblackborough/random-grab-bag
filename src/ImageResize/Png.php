@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace DBlackborough\GrabBag\ImageResize;
 
 /**
- * Resize a jpeg image
+ * Resize a png image
  *
  * @author Dean Blackborough <dean@g3d-development.com>
  * @copyright Dean Blackborough
  * @license https://github.com/deanblackborough/random-grab-bag/blob/master/LICENSE
  */
-class Jpeg extends AbstractResize
+class Png extends AbstractResize
 {
     /**
      * Set the required options for the image resizer. To allow batch processing we set the
@@ -18,8 +18,8 @@ class Jpeg extends AbstractResize
      *
      * @param integer $width Required width for the new image
      * @param integer $height Required height for the new image
-     * @param integer $quality Quality or compression level, must be a value between 1 and 100,
-     * 100 being best quality
+     * @param integer $quality Quality or compression level, must be a value between 0 and 9,
+     * 0 being no compression
      * @param boolean $maintain_aspect Maintain aspect ratio of the original image? If set to
      * true padding will be calculated and added around a best fit re-sampled image, otherwise,
      * the image will be stretched to fit the desired canvas
@@ -34,27 +34,29 @@ class Jpeg extends AbstractResize
         $maintain_aspect = false,
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
     ) {
-        if ($quality < 1 || $quality > 100) {
-            throw new \InvalidArgumentException('Quality must be a value between 1 and 100');
+        if ($quality < 1 || $quality > 9) {
+            throw new \InvalidArgumentException('Quality must be a value between 1 and 9');
         }
 
         parent::__construct($width, $height, $quality, $maintain_aspect, $canvas_color);
     }
 
     /**
-     * Create the image
+     * Create the image in the required format
      *
      * @return AbstractResize
-     * @throws \Exception Throws an exception if any step fails
+     * @throws \Exception Throws an exception if there was an error creating or saving the new image
      */
-    public function create() : AbstractResize
+    public function create(): AbstractResize
     {
         $this->createCanvas();
 
-        $this->intermediate['copy'] = imagecreatefromjpeg($this->source['path'] . $this->source['file']);
+        $this->intermediate['copy'] = imagecreatefrompng($this->source['path'] . $this->source['file']);
         if ($this->intermediate['copy'] === false) {
-            throw new \Exception('Call to imagecreatefromjpeg failed');
+            throw new \Exception('Call to imagecreatefrompng failed');
         }
+
+        $this->resampleCopy();
 
         return $this;
     }
@@ -67,9 +69,9 @@ class Jpeg extends AbstractResize
      * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    public function save($suffix) : AbstractResize
+    public function save($suffix): AbstractResize
     {
-        $result = imagejpeg($this->canvas['canvas'], $this->source['path'] .
+        $result = imagepng($this->canvas['canvas'], $this->source['path'] .
             str_replace('.jpg', $suffix . '.jpg', $this->source['file']),
             $this->canvas['quality']);
 
