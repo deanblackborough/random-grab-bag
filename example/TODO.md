@@ -4,7 +4,6 @@
 
 ## Image resize
 
-* Add ability to set the output folder.
 * Add ability to try and create the output folder.
 * Add chaining support so options can be set in a simpler way, optionally set in constructor.
 * Create API.

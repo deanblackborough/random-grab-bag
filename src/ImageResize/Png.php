@@ -12,6 +12,8 @@ namespace DBlackborough\GrabBag\ImageResize;
  */
 class Png extends AbstractResize
 {
+    protected $extension = '.png';
+
     /**
      * Set the required options for the image resizer. To allow batch processing we set the
      * majority of the options in the constructor to allow reuse of the object
@@ -62,18 +64,18 @@ class Png extends AbstractResize
     }
 
     /**
-     * Attempt to save the new image
-     *
-     * @param string $suffix Suffix for filename
+     * Attempt to save the new image file
      *
      * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    public function save($suffix): AbstractResize
+    protected function saveFile(): AbstractResize
     {
-        $result = imagepng($this->canvas['canvas'], $this->source['path'] .
-            str_replace('.jpg', $suffix . '.jpg', $this->source['file']),
-            $this->canvas['quality']);
+        $result = imagepng(
+            $this->canvas['canvas'],
+            $this->path . $this->file,
+            $this->canvas['quality']
+        );
 
         if ($result === false) {
             throw new \Exception('Unable to save new image');
