@@ -27,8 +27,27 @@ abstract class AbstractResize
      */
     protected $canvas = [];
 
+    /**
+     * @var boolean Has the process() method been called?
+     */
     protected $processed = false;
+
+    /**
+     * @var boolean Has the create() method been called?
+     */
     protected $resized = false;
+
+    /**
+     * @var string Filename for new image file
+     */
+    protected $file = null;
+
+    /**
+     * @var string Path for new image file
+     */
+    protected $path = null;
+
+    protected $extension;
 
     /**
      * Set the required options for the image resizer. To allow batch processing we set the
@@ -116,6 +135,8 @@ abstract class AbstractResize
 
         // Reset the processed status when a new image is loaded
         $this->processed = false;
+        $this->file = null;
+        $this->path = null;
 
         return $this;
     }
@@ -149,7 +170,7 @@ abstract class AbstractResize
      * @return AbstractResize
      * @throws \Exception Throws an exception if unable to create image
      */
-    public function process() : AbstractResize
+    public function resizeSource() : AbstractResize
     {
         if ($this->intermediate['maintain_aspect'] === true) {
             if ($this->source['aspect_ratio'] > 1.00) {
@@ -382,15 +403,62 @@ abstract class AbstractResize
      * @return AbstractResize
      * @throws \Exception Throws an exception if there was an error creating or saving the new image
      */
-    abstract public function create() : AbstractResize;
+    abstract public function createCopy() : AbstractResize;
 
     /**
-     * Attempt to save the new image
+     * Attempt to save the new image file
      *
-     * @param string $suffix Suffix for filename
+     * @throws \Exception Throws an exception if the save fails
+     */
+    abstract protected function saveFile();
+
+    /**
+     * Optionally set the filename for the new image, if not set we just append -copy to the
+     * existing filename
+     *
+     * @param string $filename Filename of new image
+     *
+     * @return AbstractResize
+     */
+    public function setFileName(string $filename) : AbstractResize
+    {
+        $this->file = $filename;
+
+        return $this;
+    }
+
+    /**
+     * Optionally set the path for the new image file otherwise we use the same path as the
+     * source image
+     *
+     * @param string $path Path for new image file
+     *
+     * @return AbstractResize
+     */
+    public function setPath($path) : AbstractResize
+    {
+        $this->path = $path;
+
+        return $this;
+    }
+
+    /**
+     * Save the new image
      *
      * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    abstract public function save($suffix) : AbstractResize;
+    public function save()
+    {
+        if ($this->file === null) {
+            $this->file = str_replace($this->extension, '-copy' . $this->extension, $this->source['file']);
+        }
+        if ($this->path === null) {
+            $this->path = $this->source['path'];
+        }
+
+        $this->saveFile();
+
+        return $this;
+    }
 }

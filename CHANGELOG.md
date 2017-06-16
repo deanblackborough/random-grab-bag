@@ -2,6 +2,12 @@
 
 Full changelog for the random grab bag
 
+### v0.04 - Filename and path - 2017-06-16
+
+* Added the ability to optionally set the filename and path for the copy.
+* Refactoring, better method names, reduce duplication.
+* resampleCopy not being called [Bug]
+
 ### v0.03 - Png & Gif - 2017-05-15
 
 * Added png and gif support to image resize.

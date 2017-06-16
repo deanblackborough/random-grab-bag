@@ -12,6 +12,8 @@ namespace DBlackborough\GrabBag\ImageResize;
  */
 class Jpeg extends AbstractResize
 {
+    protected $extension = '.jpg';
+
     /**
      * Set the required options for the image resizer. To allow batch processing we set the
      * majority of the options in the constructor to allow reuse of the object
@@ -47,7 +49,7 @@ class Jpeg extends AbstractResize
      * @return AbstractResize
      * @throws \Exception Throws an exception if any step fails
      */
-    public function create() : AbstractResize
+    public function createCopy() : AbstractResize
     {
         $this->createCanvas();
 
@@ -56,21 +58,27 @@ class Jpeg extends AbstractResize
             throw new \Exception('Call to imagecreatefromjpeg failed');
         }
 
+        $this->resampleCopy();
+
         return $this;
     }
 
     /**
-     * Attempt to save the new image
-     *
-     * @param string $suffix Suffix for filename
+     * Attempt to save the new image file
      *
      * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    public function save($suffix) : AbstractResize
+    protected function saveFile(): AbstractResize
     {
+        /*$result = imagejpeg(
+            $this->canvas['canvas'],
+            $this->path . $this->file,
+            $this->canvas['quality']
+        );*/
+
         $result = imagejpeg($this->canvas['canvas'], $this->source['path'] .
-            str_replace('.jpg', $suffix . '.jpg', $this->source['file']),
+            str_replace('.jpg', '-copy' . '.jpg', $this->source['file']),
             $this->canvas['quality']);
 
         if ($result === false) {
