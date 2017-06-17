@@ -72,19 +72,18 @@ abstract class AbstractResize
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
     ) {
         if ($width < 1) {
-            throw new \InvalidArgumentException('Width not valid, must be greater than 0');
+            throw new \InvalidArgumentException(Config::ERROR_WIDTH_INVALID);
         }
 
         if ($height < 1) {
-            throw new \InvalidArgumentException('Height not valid, must be greater than 0');
+            throw new \InvalidArgumentException(Config::ERROR_HEIGHT_INVALID);
         }
 
         if ($this->colorIndexValid('r', $canvas_color) === false ||
             $this->colorIndexValid('g', $canvas_color) === false ||
             $this->colorIndexValid('b', $canvas_color) === false
         ) {
-            throw new \InvalidArgumentException('Canvas colour array invalid, it should contain three indexes, r, g 
-                and b and each should have a value between 0 and 255');
+            throw new \InvalidArgumentException(CONFIG::ERROR_CANVAS_COLOR_ARRAY_INVALID);
         }
 
         $this->canvas['width'] = $width;
@@ -92,6 +91,44 @@ abstract class AbstractResize
         $this->canvas['quality'] = $quality;
         $this->canvas['color'] = $canvas_color;
         $this->intermediate['maintain_aspect'] = $maintain_aspect;
+    }
+
+    /**
+     * Set a new width value, useful if you are using the resize class within a loop/iterator
+     *
+     * @param int $width
+     *
+     * @return AbstractResize
+     * @throws \Exception
+     */
+    public function setNewWidth(int $width) : AbstractResize
+    {
+        if ($width < 1) {
+            throw new \InvalidArgumentException(Config::ERROR_WIDTH_INVALID);
+        }
+
+        $this->canvas['width'] = $width;
+
+        return $this;
+    }
+
+    /**
+     * Set a new height value, useful if you are using the resize class within a loop/iterator
+     *
+     * @param int $height
+     *
+     * @return AbstractResize
+     * @throws \Exception
+     */
+    public function setNewHeight(int $height) : AbstractResize
+    {
+        if ($height < 1) {
+            throw new \InvalidArgumentException(Config::ERROR_HEIGHT_INVALID);
+        }
+
+        $this->canvas['height'] = $height;
+
+        return $this;
     }
 
     /**
@@ -129,8 +166,7 @@ abstract class AbstractResize
             $this->source['file'] = $file;
             $this->sourceDimensions();
         } else {
-            throw new \Exception("File couldn't be found, supplied 
-			destination: '" . $path . $file . "'");
+            throw new \Exception("File couldn't be found in supplied destination: '" . $path . $file . "'");
         }
 
         // Reset the processed status when a new image is loaded
@@ -158,8 +194,7 @@ abstract class AbstractResize
         $this->source['aspect_ratio'] = floatval($this->source['width'] / $this->source['height']);
 
         if ($this->canvas['width'] > $this->source['width'] || $this->canvas['height'] > $this->source['height']) {
-            throw new \Exception("The options are set to upscale the image, this class 
-             does not support that.");
+            throw new \Exception(CONFIG::ERROR_UPSCALE);
         }
     }
 
@@ -353,7 +388,7 @@ abstract class AbstractResize
                 ]
             ];
         } else {
-            throw new \Exception('Unable to getInfo(), process() not called');
+            throw new \Exception(CONFIG::ERROR_CALL_GETINFO);
         }
     }
 
@@ -366,17 +401,17 @@ abstract class AbstractResize
     {
         $this->canvas['canvas'] = imagecreatetruecolor($this->canvas['width'], $this->canvas['height']);
         if ($this->canvas['canvas'] === false) {
-            throw new \Exception('Call to imagecreatetruecolor failed');
+            throw new \Exception(CONFIG::ERROR_CALL_IMAGECREATETRUECOLOR);
         }
 
         $fill_color = imagecolorallocate($this->canvas['canvas'], $this->canvas['color']['r'],
             $this->canvas['color']['g'], $this->canvas['color']['b']);
         if ($fill_color === false) {
-            throw new \Exception('Call to imagecolorallocate failed');
+            throw new \Exception(CONFIG::ERROR_CALL_IMAGECOLORALLOCATE);
         }
 
         if (imagefill($this->canvas['canvas'], 0, 0, $fill_color) === false) {
-            throw new \Exception('Call to imagefill failed');
+            throw new \Exception(CONFIG::ERROR_CALL_IMAGEFILL);
         };
     }
 
@@ -393,7 +428,7 @@ abstract class AbstractResize
             $this->source['height']);
 
         if($result === false) {
-            throw new \Exception('Call to imagecopyresampled failed');
+            throw new \Exception(CONFIG::ERROR_CALL_IMAGECOPYRESAMPLED);
         }
     }
 
