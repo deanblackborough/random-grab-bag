@@ -33,11 +33,6 @@ abstract class AbstractResize
     protected $processed = false;
 
     /**
-     * @var boolean Has the create() method been called?
-     */
-    protected $resized = false;
-
-    /**
      * @var string Filename for new image file
      */
     protected $file = null;
