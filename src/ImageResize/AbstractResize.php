@@ -127,6 +127,26 @@ abstract class AbstractResize
     }
 
     /**
+     * Set a new canvas color
+     *
+     * @param array $canvas_color Indexed array, r, g, b for color
+     *
+     * @return AbstractResize
+     * @throws \Exception
+     */
+    public function setCanvasColor(array $canvas_color) : AbstractResize
+    {
+        if (Helper::colorIndexValid('r', $canvas_color) === false ||
+            Helper::colorIndexValid('g', $canvas_color) === false ||
+            Helper::colorIndexValid('b', $canvas_color) === false
+        ) {
+            throw new \InvalidArgumentException(Helper::ERROR_CANVAS_COLOR_ARRAY_INVALID);
+        }
+
+        $this->canvas['color'] = $canvas_color;
+    }
+
+    /**
      * Load the image
      *
      * @param string $file File name and extension
