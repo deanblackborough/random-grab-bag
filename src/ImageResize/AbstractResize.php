@@ -72,18 +72,18 @@ abstract class AbstractResize
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
     ) {
         if ($width < 1) {
-            throw new \InvalidArgumentException(Config::ERROR_WIDTH_INVALID);
+            throw new \InvalidArgumentException(Helper::ERROR_WIDTH_INVALID);
         }
 
         if ($height < 1) {
-            throw new \InvalidArgumentException(Config::ERROR_HEIGHT_INVALID);
+            throw new \InvalidArgumentException(Helper::ERROR_HEIGHT_INVALID);
         }
 
-        if ($this->colorIndexValid('r', $canvas_color) === false ||
-            $this->colorIndexValid('g', $canvas_color) === false ||
-            $this->colorIndexValid('b', $canvas_color) === false
+        if (Helper::colorIndexValid('r', $canvas_color) === false ||
+            Helper::colorIndexValid('g', $canvas_color) === false ||
+            Helper::colorIndexValid('b', $canvas_color) === false
         ) {
-            throw new \InvalidArgumentException(CONFIG::ERROR_CANVAS_COLOR_ARRAY_INVALID);
+            throw new \InvalidArgumentException(Helper::ERROR_CANVAS_COLOR_ARRAY_INVALID);
         }
 
         $this->canvas['width'] = $width;
@@ -101,10 +101,10 @@ abstract class AbstractResize
      * @return AbstractResize
      * @throws \Exception
      */
-    public function setNewWidth(int $width) : AbstractResize
+    public function setWidth(int $width) : AbstractResize
     {
         if ($width < 1) {
-            throw new \InvalidArgumentException(Config::ERROR_WIDTH_INVALID);
+            throw new \InvalidArgumentException(Helper::ERROR_WIDTH_INVALID);
         }
 
         $this->canvas['width'] = $width;
@@ -120,34 +120,15 @@ abstract class AbstractResize
      * @return AbstractResize
      * @throws \Exception
      */
-    public function setNewHeight(int $height) : AbstractResize
+    public function setHeight(int $height) : AbstractResize
     {
         if ($height < 1) {
-            throw new \InvalidArgumentException(Config::ERROR_HEIGHT_INVALID);
+            throw new \InvalidArgumentException(Helper::ERROR_HEIGHT_INVALID);
         }
 
         $this->canvas['height'] = $height;
 
         return $this;
-    }
-
-    /**
-     * Check to see if the supplied color index is valid
-     *
-     * @param string $index
-     * @param array $color The color array to check
-     *
-     * @return boolean
-     */
-    private function colorIndexValid(string $index, array $color) : bool
-    {
-        if (array_key_exists($index, $color) === true &&
-            $color[$index] >= 0 && $color[$index] <= 255
-        ) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -164,7 +145,7 @@ abstract class AbstractResize
         if (file_exists($path . $file) === true) {
             $this->source['path'] = $path;
             $this->source['file'] = $file;
-            $this->sourceDimensions();
+            $this->sourceProperties();
         } else {
             throw new \Exception("File couldn't be found in supplied destination: '" . $path . $file . "'");
         }
@@ -185,16 +166,20 @@ abstract class AbstractResize
      * @return void
      * @throws \Exception
      */
-    protected function sourceDimensions()
+    protected function sourceProperties()
     {
-        $dimensions = getimagesize($this->source['path'] . $this->source['file']);
+        $properties = Helper::imageProperties($this->source['file'], $this->source['path']);
 
-        $this->source['width'] = intval($dimensions[0]);
-        $this->source['height'] = intval($dimensions[1]);
-        $this->source['aspect_ratio'] = floatval($this->source['width'] / $this->source['height']);
+        if ($properties['width'] !== null) {
+            $this->source['width'] = $properties['width'];
+            $this->source['height'] = $properties['height'];
+            $this->source['aspect_ratio'] = $properties['aspect_ratio'];
+        } else {
+            throw new \Exception(Helper::ERROR_CALL_GETIMAGESIZE);
+        }
 
         if ($this->canvas['width'] > $this->source['width'] || $this->canvas['height'] > $this->source['height']) {
-            throw new \Exception(CONFIG::ERROR_UPSCALE);
+            throw new \Exception(Helper::ERROR_UPSCALE);
         }
     }
 
@@ -388,7 +373,7 @@ abstract class AbstractResize
                 ]
             ];
         } else {
-            throw new \Exception(CONFIG::ERROR_CALL_GETINFO);
+            throw new \Exception(Helper::ERROR_CALL_GETINFO);
         }
     }
 
@@ -401,17 +386,17 @@ abstract class AbstractResize
     {
         $this->canvas['canvas'] = imagecreatetruecolor($this->canvas['width'], $this->canvas['height']);
         if ($this->canvas['canvas'] === false) {
-            throw new \Exception(CONFIG::ERROR_CALL_IMAGECREATETRUECOLOR);
+            throw new \Exception(Helper::ERROR_CALL_IMAGECREATETRUECOLOR);
         }
 
         $fill_color = imagecolorallocate($this->canvas['canvas'], $this->canvas['color']['r'],
             $this->canvas['color']['g'], $this->canvas['color']['b']);
         if ($fill_color === false) {
-            throw new \Exception(CONFIG::ERROR_CALL_IMAGECOLORALLOCATE);
+            throw new \Exception(Helper::ERROR_CALL_IMAGECOLORALLOCATE);
         }
 
         if (imagefill($this->canvas['canvas'], 0, 0, $fill_color) === false) {
-            throw new \Exception(CONFIG::ERROR_CALL_IMAGEFILL);
+            throw new \Exception(Helper::ERROR_CALL_IMAGEFILL);
         };
     }
 
@@ -428,7 +413,7 @@ abstract class AbstractResize
             $this->source['height']);
 
         if($result === false) {
-            throw new \Exception(CONFIG::ERROR_CALL_IMAGECOPYRESAMPLED);
+            throw new \Exception(Helper::ERROR_CALL_IMAGECOPYRESAMPLED);
         }
     }
 
