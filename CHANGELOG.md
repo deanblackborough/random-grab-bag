@@ -2,6 +2,12 @@
 
 Full changelog for the random grab bag
 
+### v0.05 - Options and refactoring - 2017-06-17
+
+* Added a helper class for error message strings and base functions.
+* Added setters for options, allows chaining, process image multiple times in one request.
+* Refactoring and minor fixes.
+
 ### v0.04 - Filename and path - 2017-06-16
 
 * Added the ability to optionally set the filename and path for the copy.

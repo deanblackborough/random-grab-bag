@@ -71,15 +71,7 @@ class Jpeg extends AbstractResize
      */
     protected function saveFile(): AbstractResize
     {
-        /*$result = imagejpeg(
-            $this->canvas['canvas'],
-            $this->path . $this->file,
-            $this->canvas['quality']
-        );*/
-
-        $result = imagejpeg($this->canvas['canvas'], $this->source['path'] .
-            str_replace('.jpg', '-copy' . '.jpg', $this->source['file']),
-            $this->canvas['quality']);
+        $result = imagejpeg($this->canvas['canvas'], $this->path . $this->file, $this->canvas['quality']);
 
         if ($result === false) {
             throw new \Exception('Unable to save new image');
