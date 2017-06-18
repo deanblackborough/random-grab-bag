@@ -12,5 +12,28 @@ namespace DBlackborough\GrabBag;
  */
 class ImageResize
 {
+    public function source() : ImageResize
+    {
 
+    }
+
+    public function resizeTo() : ImageResize
+    {
+
+    }
+
+    public function resizeTo50Percent() : ImageResize
+    {
+
+    }
+
+    public function resetTo20Percent() : ImageResize
+    {
+
+    }
+
+    public function destination() : array
+    {
+
+    }
 }
