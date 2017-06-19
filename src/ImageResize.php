@@ -12,28 +12,53 @@ namespace DBlackborough\GrabBag;
  */
 class ImageResize
 {
-    public function source() : ImageResize
-    {
+    /**
+     * @var ImageResize\AbstractResize
+     */
+    private $resizer = null;
 
+    private $loaded = false;
+
+    public function __construct($format = 'jpg')
+    {
+        
     }
 
-    public function resizeTo() : ImageResize
+    public function resizeTo($width, $height) : ImageResize
     {
+        $this->resizer = new ImageResize\Jpeg($width, $height, 100);
 
+        return $this;
     }
 
-    public function resizeTo50Percent() : ImageResize
+    public function source($file, $path = '') : ImageResize
     {
+        if ($this->resizer !== null) {
+            try {
+                $this->resizer->loadImage($file, $path);
+                $this->loaded = true;
+            } catch (\Exception $e) {
+                echo $e->getMessage();
+            }
+        }
 
+        return $this;
     }
 
-    public function resetTo20Percent() : ImageResize
+    public function target($file, $path = '') : array
     {
+        if ($this->resizer !== null && $this->loaded === true) {
+            try {
+                $this->resizer->resizeSource()
+                    ->createCopy()
+                    ->setFileName($file)
+                    ->setPath($path)
+                    ->save();
 
-    }
-
-    public function target() : array
-    {
-
+                return $this->resizer->getInfo();
+            } catch (\Exception $e) {
+                echo $e->getMessage();
+            }
+        }
     }
 }
