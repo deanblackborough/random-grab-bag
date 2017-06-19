@@ -32,7 +32,7 @@ class ImageResize
 
     }
 
-    public function destination() : array
+    public function target() : array
     {
 
     }
