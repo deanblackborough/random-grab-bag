@@ -43,11 +43,11 @@ class Png extends AbstractResize
         int $width,
         int $height,
         int $quality,
-        bool $maintain_aspect = false,
+        bool $maintain_aspect = true,
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
     ) : AbstractResize {
-        if ($quality < 1 || $quality > 9) {
-            throw new \InvalidArgumentException('Quality must be a value between 1 and 9');
+        if ($quality < 0 || $quality > 9) {
+            throw new \InvalidArgumentException('Quality must be a value between 0 and 9');
         }
 
         parent::setOptions($width, $height, $quality, $maintain_aspect, $canvas_color);

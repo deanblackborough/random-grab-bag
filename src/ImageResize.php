@@ -17,21 +17,67 @@ class ImageResize
      */
     private $resizer = null;
 
+    /**
+     * @var boolean Has a source image been loaded
+     */
     private $loaded = false;
 
-    public function __construct($format = 'jpg')
-    {
+    /**
+     * @var integer Quality setting for resizer
+     */
+    private $quality;
 
+    /**
+     * ImageResize constructor.
+     *
+     * @param string $format Format of source [jpg|png|gif]
+     * @throws \Exception
+     */
+    public function __construct(string $format = 'jpg')
+    {
+        switch ($format) {
+            case 'jpg':
+                $this->resizer = new ImageResize\Jpeg();
+                $this->quality = 100;
+                break;
+            case 'png':
+                $this->resizer = new ImageResize\Png();
+                $this->quality = 0;
+                break;
+            case 'gif':
+                $this->resizer = new ImageResize\Gif();
+                $this->quality = 0;
+                break;
+            default:
+                throw new \Exception('Format not supported');
+                break;
+        }
     }
 
-    public function resizeTo($width, $height) : ImageResize
+    /**
+     * Set the resize to options
+     *
+     * @param integer $width
+     * @param integer $height
+     * @param boolean $maintain_aspect
+     * @param array $canvas_color
+     *
+     * @return ImageResize
+     */
+    public function resizeTo(int $width, int $height, bool $maintain_aspect = true, array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)) : ImageResize
     {
-        $this->resizer = new ImageResize\Jpeg($width, $height, 100);
+        if ($this->resizer !== null) {
+            try {
+                $this->resizer->setOptions($width, $height, $this->quality, $maintain_aspect, $canvas_color);
+            } catch (\Exception $e) {
+                echo $e->getMessage();
+            }
+        }
 
         return $this;
     }
 
-    public function source($file, $path = '') : ImageResize
+    public function source(string $file, string $path = '') : ImageResize
     {
         if ($this->resizer !== null) {
             try {
@@ -45,7 +91,7 @@ class ImageResize
         return $this;
     }
 
-    public function target($file, $path = '') : array
+    public function target(string $file, string $path = '') : array
     {
         if ($this->resizer !== null && $this->loaded === true) {
             try {

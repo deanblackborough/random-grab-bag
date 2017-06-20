@@ -71,7 +71,7 @@ abstract class AbstractResize
         int $width,
         int $height,
         int $quality,
-        bool $maintain_aspect = false,
+        bool $maintain_aspect = true,
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
     ) : AbstractResize {
         if ($width < 1) {
