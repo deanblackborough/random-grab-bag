@@ -31,6 +31,7 @@ class ImageResize
      * ImageResize constructor.
      *
      * @param string $format Format of source [jpg|png|gif]
+     *
      * @throws \Exception
      */
     public function __construct(string $format = 'jpg')
@@ -77,6 +78,14 @@ class ImageResize
         return $this;
     }
 
+    /**
+     * Set the source image
+     *
+     * @param string $file File name of the source image
+     * @param string $path Optional path for the source image
+     *
+     * @return ImageResize
+     */
     public function source(string $file, string $path = '') : ImageResize
     {
         if ($this->resizer !== null) {
@@ -91,6 +100,14 @@ class ImageResize
         return $this;
     }
 
+    /**
+     * Set the file name and path for the target, this will be your newly resized image
+     *
+     * @param string $file File name for the target image
+     * @param string $path Optional path for target image, if not set, source path is used
+     *
+     * @return array Returns an array of the properties for the resizer
+     */
     public function target(string $file, string $path = '') : array
     {
         if ($this->resizer !== null && $this->loaded === true) {

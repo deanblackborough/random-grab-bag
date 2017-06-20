@@ -480,7 +480,7 @@ abstract class AbstractResize
      *
      * @return AbstractResize
      */
-    public function setPath($path) : AbstractResize
+    public function setPath(string $path) : AbstractResize
     {
         $this->path = $path;
 
@@ -493,7 +493,7 @@ abstract class AbstractResize
      * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    public function save()
+    public function save() : AbstractResize
     {
         if ($this->file === null) {
             $this->file = str_replace($this->extension, '-copy' . $this->extension, $this->source['file']);
