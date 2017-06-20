@@ -2,6 +2,13 @@
 
 Full changelog for the random grab bag
 
+### v0.06 - API - 2017-06-20
+
+* API for the image resize classes.
+* Maintain aspect ration defaults to true.
+* Modified resize classes, move setting of options outside of constructor.
+* Updated README, added overview of first class.
+
 ### v0.05 - Options and refactoring - 2017-06-17
 
 * Added a helper class for error message strings and base functions.

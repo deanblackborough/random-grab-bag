@@ -12,11 +12,18 @@ namespace DBlackborough\GrabBag\ImageResize;
  */
 class Jpeg extends AbstractResize
 {
-    protected $extension = '.jpg';
+    /**
+     * Jpeg constructor.
+     */
+    public function __construct()
+    {
+        $this->extension = '.jpg';
+
+        parent::__construct();
+    }
 
     /**
-     * Set the required options for the image resizer. To allow batch processing we set the
-     * majority of the options in the constructor to allow reuse of the object
+     * Set the required options for the image resizer.
      *
      * @param integer $width Required width for the new image
      * @param integer $height Required height for the new image
@@ -27,20 +34,23 @@ class Jpeg extends AbstractResize
      * the image will be stretched to fit the desired canvas
      * @param array $canvas_color Canvas background color, passed in as an rgb array
      *
+     * @return AbstractResize
      * @throws \InvalidArgumentException If any of the params are invalid we throw an exception
      */
-    public function __construct(
+    public function setOptions(
         int $width,
         int $height,
         int $quality,
-        $maintain_aspect = false,
+        bool $maintain_aspect = true,
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
-    ) {
+    ) : AbstractResize {
         if ($quality < 1 || $quality > 100) {
             throw new \InvalidArgumentException('Quality must be a value between 1 and 100');
         }
 
-        parent::__construct($width, $height, $quality, $maintain_aspect, $canvas_color);
+        parent::setOptions($width, $height, $quality, $maintain_aspect, $canvas_color);
+
+        return $this;
     }
 
     /**

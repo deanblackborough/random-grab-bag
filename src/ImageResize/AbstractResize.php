@@ -45,8 +45,15 @@ abstract class AbstractResize
     protected $extension;
 
     /**
-     * Set the required options for the image resizer. To allow batch processing we set the
-     * majority of the options in the constructor to allow reuse of the object
+     * AbstractResize constructor.
+     */
+    public function __construct()
+    {
+        // Do nothing
+    }
+
+    /**
+     * Set the required options for the image resizer.
      *
      * @param integer $width Required width for the new image
      * @param integer $height Required height for the new image
@@ -57,15 +64,16 @@ abstract class AbstractResize
      * the image will be stretched to fit the desired canvas
      * @param array $canvas_color Canvas background color, passed in as an rgb array
      *
+     * @return AbstractResize
      * @throws \InvalidArgumentException If any of the params are invalid we throw an exception
      */
-    public function __construct(
+    public function setOptions(
         int $width,
         int $height,
         int $quality,
-        bool $maintain_aspect = false,
+        bool $maintain_aspect = true,
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
-    ) {
+    ) : AbstractResize {
         if ($width < 1) {
             throw new \InvalidArgumentException(Helper::ERROR_WIDTH_INVALID);
         }
@@ -86,6 +94,8 @@ abstract class AbstractResize
         $this->canvas['quality'] = $quality;
         $this->canvas['color'] = $canvas_color;
         $this->intermediate['maintain_aspect'] = $maintain_aspect;
+
+        return $this;
     }
 
     /**
@@ -470,7 +480,7 @@ abstract class AbstractResize
      *
      * @return AbstractResize
      */
-    public function setPath($path) : AbstractResize
+    public function setPath(string $path) : AbstractResize
     {
         $this->path = $path;
 
@@ -483,7 +493,7 @@ abstract class AbstractResize
      * @return AbstractResize
      * @throws \Exception Throws an exception if the save fails
      */
-    public function save()
+    public function save() : AbstractResize
     {
         if ($this->file === null) {
             $this->file = str_replace($this->extension, '-copy' . $this->extension, $this->source['file']);
