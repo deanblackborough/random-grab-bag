@@ -35,6 +35,7 @@ class Gif extends AbstractResize
      * the image will be stretched to fit the desired canvas
      * @param array $canvas_color Canvas background color, passed in as an rgb array
      *
+     * @return AbstractResize
      * @throws \InvalidArgumentException If any of the params are invalid we throw an exception
      */
     public function setOptions(
@@ -43,7 +44,7 @@ class Gif extends AbstractResize
         int $quality,
         bool $maintain_aspect = false,
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
-    ) {
+    ) : AbstractResize {
         if ($quality !== 0) {
             throw new \InvalidArgumentException('Quality must be set to 0');
         }

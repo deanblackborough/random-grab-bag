@@ -64,6 +64,7 @@ abstract class AbstractResize
      * the image will be stretched to fit the desired canvas
      * @param array $canvas_color Canvas background color, passed in as an rgb array
      *
+     * @return AbstractResize
      * @throws \InvalidArgumentException If any of the params are invalid we throw an exception
      */
     public function setOptions(
@@ -72,7 +73,7 @@ abstract class AbstractResize
         int $quality,
         bool $maintain_aspect = false,
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
-    ) {
+    ) : AbstractResize {
         if ($width < 1) {
             throw new \InvalidArgumentException(Helper::ERROR_WIDTH_INVALID);
         }
@@ -93,6 +94,8 @@ abstract class AbstractResize
         $this->canvas['quality'] = $quality;
         $this->canvas['color'] = $canvas_color;
         $this->intermediate['maintain_aspect'] = $maintain_aspect;
+
+        return $this;
     }
 
     /**
