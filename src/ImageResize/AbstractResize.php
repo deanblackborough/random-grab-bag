@@ -45,8 +45,15 @@ abstract class AbstractResize
     protected $extension;
 
     /**
-     * Set the required options for the image resizer. To allow batch processing we set the
-     * majority of the options in the constructor to allow reuse of the object
+     * AbstractResize constructor.
+     */
+    public function __construct()
+    {
+        // Do nothing
+    }
+
+    /**
+     * Set the required options for the image resizer.
      *
      * @param integer $width Required width for the new image
      * @param integer $height Required height for the new image
@@ -59,7 +66,7 @@ abstract class AbstractResize
      *
      * @throws \InvalidArgumentException If any of the params are invalid we throw an exception
      */
-    public function __construct(
+    public function setOptions(
         int $width,
         int $height,
         int $quality,

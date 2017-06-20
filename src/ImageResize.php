@@ -21,7 +21,7 @@ class ImageResize
 
     public function __construct($format = 'jpg')
     {
-        
+
     }
 
     public function resizeTo($width, $height) : ImageResize

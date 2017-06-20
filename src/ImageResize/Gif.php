@@ -12,11 +12,20 @@ namespace DBlackborough\GrabBag\ImageResize;
 */
 class Gif extends AbstractResize
 {
-    protected $extension = '.gif';
+    protected $extension;
 
     /**
-     * Set the required options for the image resizer. To allow batch processing we set the
-     * majority of the options in the constructor to allow reuse of the object
+     * Gif constructor.
+     */
+    public function __construct()
+    {
+        $this->extension = '.jpg';
+
+        parent::__construct();
+    }
+
+    /**
+     * Set the required options for the image resizer.
      *
      * @param integer $width Required width for the new image
      * @param integer $height Required height for the new image
@@ -28,18 +37,18 @@ class Gif extends AbstractResize
      *
      * @throws \InvalidArgumentException If any of the params are invalid we throw an exception
      */
-    public function __construct(
+    public function setOptions(
         int $width,
         int $height,
         int $quality,
-        $maintain_aspect = false,
+        bool $maintain_aspect = false,
         array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
     ) {
         if ($quality !== 0) {
             throw new \InvalidArgumentException('Quality must be set to 0');
         }
 
-        parent::__construct($width, $height, $quality, $maintain_aspect, $canvas_color);
+        parent::setOptions($width, $height, $quality, $maintain_aspect, $canvas_color);
     }
 
     /**
