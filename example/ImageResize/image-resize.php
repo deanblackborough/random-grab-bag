@@ -7,11 +7,15 @@ include '../../src/ImageResize/Jpeg.php';
 
 $resizer = new DBlackborough\GrabBag\ImageResize\Jpeg();
 
-$resizer->setOptions(128, 76, 100)
-    ->loadImage('tower-bridge-1280-760.jpg')
-    ->resizeSource()
-    ->createCopy()
-    ->save();
+try {
+    $resizer->setOptions(128, 76, 100)
+        ->loadImage('tower-bridge-1280-760.jpg')
+        ->resizeSource()
+        ->createCopy()
+        ->save();
+} catch (Exception $e) {
+    echo $e->getMessage();
+}
 
 $resizer = new DBlackborough\GrabBag\ImageResize('jpg');
 
