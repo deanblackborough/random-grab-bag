@@ -1,13 +1,13 @@
 {
     "name": "deanblackborough/random-grab-bag",
-    "description": "A random grab bag of classes",
+    "description": "A random grab bag of utility classes that have no fixed abode yet.",
     "autoload": {
         "psr-4" : {
             "DBlackborough\\GrabBag\\" : "src/"
         }
     },
-    "homepage": "https://github.com/deanblackborough/random-grab-bag",
-    "keywords": [ "image-resize", "image-crop" ],
+    "homepage": "http://www.transmute-coffee.com",
+    "keywords": [ "image-resize", "image-crop", "excel-parser" ],
     "authors": [
         {
             "name": "Dean Blackborough",
@@ -18,7 +18,7 @@
         "php": "^7.1"
     },
     "require-dev": {
-
+        "phpunit/phpunit": "^6"
     },
     "repositories": [
         {
