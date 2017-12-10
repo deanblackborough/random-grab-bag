@@ -2,6 +2,13 @@
 
 Full changelog for the random grab bag
 
+### v0.07 - Fixes - 2017-12-10
+
+* Updated Composer.json and README, PHP7.1+ library.
+* Removed TODO
+* Fixed bugs in Png and Gif resizer, not implementing abstract class correctly.
+* Return not set for constructors.
+
 ### v0.06 - API - 2017-06-20
 
 * API for the image resize classes.
