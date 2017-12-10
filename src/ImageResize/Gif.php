@@ -50,6 +50,8 @@ class Gif extends AbstractResize
         }
 
         parent::setOptions($width, $height, $quality, $maintain_aspect, $canvas_color);
+
+        return $this;
     }
 
     /**
@@ -58,14 +60,16 @@ class Gif extends AbstractResize
      * @return AbstractResize
      * @throws \Exception Throws an exception if there was an error creating or saving the new image
      */
-    public function create(): AbstractResize
+    public function createCopy(): AbstractResize
     {
         $this->createCanvas();
 
         $this->intermediate['copy'] = imagecreatefromgif($this->source['path'] . $this->source['file']);
         if ($this->intermediate['copy'] === false) {
-            throw new \Exception('Call to imagecreatefromjpeg failed');
+            throw new \Exception('Call to imagecreatefromgif failed');
         }
+
+        $this->resampleCopy();
 
         return $this;
     }

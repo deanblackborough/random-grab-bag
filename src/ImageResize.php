@@ -65,7 +65,12 @@ class ImageResize
      *
      * @return ImageResize
      */
-    public function resizeTo(int $width, int $height, bool $maintain_aspect = true, array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)) : ImageResize
+    public function resizeTo(
+        int $width,
+        int $height,
+        bool $maintain_aspect = true,
+        array $canvas_color = array('r' => 255, 'g' => 255, 'b' => 255)
+    ) : ImageResize
     {
         if ($this->resizer !== null) {
             try {

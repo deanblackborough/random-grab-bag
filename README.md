@@ -8,7 +8,7 @@
 
 ## Description
 
-A bunch of utility classes that don't currently deserve their own dedicated library.
+A random grab bag of utility classes that have no fixed abode yet.
 
 ## Installation
  
@@ -19,7 +19,7 @@ alternatively include the classes in src/ in your library.
 
 ### Image Resize
 
-You can use the resize class via the API or directly if you want a little more control over the 
+You can use the resize class via the API or directly if you want or need a little more control over the 
 output and options.
 
 #### API
