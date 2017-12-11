@@ -7,7 +7,7 @@
         }
     },
     "homepage": "http://www.transmute-coffee.com",
-    "keywords": [ "image-resize", "image-crop", "excel-parser" ],
+    "keywords": [ "image-resize", "image-crop", "excel-parser", "excel-crawler"  ],
     "authors": [
         {
             "name": "Dean Blackborough",
@@ -15,7 +15,8 @@
         }
     ],
     "require": {
-        "php": "^7.1"
+        "php": "^7.1",
+        "phpoffice/phpspreadsheet": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "^6"
