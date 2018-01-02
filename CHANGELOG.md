@@ -2,6 +2,10 @@
 
 Full changelog for the random grab bag
 
+### v0.08 - [NAME] - [DATE]
+
+* getInfo() always returns an array, error index added if an exception was thrown 
+
 ### v0.07 - Fixes - 2017-12-10
 
 * Updated Composer.json and README, PHP7.1+ library.

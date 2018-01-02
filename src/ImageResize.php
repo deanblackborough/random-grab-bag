@@ -111,7 +111,8 @@ class ImageResize
      * @param string $file File name for the target image
      * @param string $path Optional path for target image, if not set, source path is used
      *
-     * @return array Returns an array of the properties for the resizer
+     * @return array Returns an array of the properties for the resizer, error index included if an
+     * exception was thrown
      */
     public function target(string $file, string $path = '') : array
     {
@@ -125,7 +126,26 @@ class ImageResize
 
                 return $this->resizer->getInfo();
             } catch (\Exception $e) {
-                echo $e->getMessage();
+                return [
+                    'canvas' => [
+                        'width' => null,
+                        'height' => null,
+                        'color' => null
+                    ],
+                    'resized-image' => [
+                        'width' => null,
+                        'height' => null
+                    ],
+                    'canvas-placement' => [
+                        'x' => null,
+                        'y' => null
+                    ],
+                    'resizer' => [
+                        'maintain-aspect-ratio' => null,
+                        'quality' => null
+                    ],
+                    'error' => $e->getMessage()
+                ];
             }
         }
     }
